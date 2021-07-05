@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>project</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/element.css">
+</head>
+<body style="background-color: #ddd">
+<div id="wrapper">
+    <!--        头部-->
+    <el-row style="height: 50px; background-color: black; line-height: 50px; color: white;">
+        <el-col :span="22"><div style="font-size: 30px; margin-left: 20px;"><a href="/index.html">LOGO</a></div></el-col>
+        <el-col :span="2" style="text-align: right">
+            <el-dropdown>
+                <el-button type="primary" style="margin-right: 10px">{{user.username}}</el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <a href="/person.html" style="display:inline-block; padding: 5px 0; width: 100px; text-align: center; color: black">个人信息</a>
+                    <a @click="logout" href="#" style="display:block; width: 100px;  text-align: center; color: black">退出</a>
+                </el-dropdown-menu>
+            </el-dropdown>
+
+        </el-col>
+    </el-row>
+
+    <!--        表格-->
+    <el-row style="margin-top: 10px">
+        <el-col :span="16" :offset="4">
+            <div style="color: black; font-size: 20px; margin: 10px 0">项目概览</div>
+            <el-button @click="javascrtpt:window.location.href='/tab_proj.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                project表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/index.html'" v-show="user.authority== 1" type="primary" size="mini" style="margin: 10px 5px" plain>
+                user表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/tab_loc.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                location表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/tab_mete.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                meteorology表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/tab_owner.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                owner表
+            </el-button>
+
+            <el-button @click="javascrtpt:window.location.href='/tab_area.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                pv_area表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/tab_boos.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                pv_booster表
+            </el-button>
+            <el-button @click="javascrtpt:window.location.href='/tab_sys.html'" type="primary" size="mini" style="margin: 10px 5px" plain>
+                pv_system表
+            </el-button>
+
+            <div style="height: 1px; background-color: white"></div>
+            <el-button @click="add" v-show="user.authority== 1" type="primary" size="mini" style="margin: 10px 0">新增</el-button>
+<!--            <el-button @click="exp" type="primary" size="mini" style="margin: 10px 0">导出</el-button>-->
+
+            <el-table
+                    :data="tableData"
+                    border
+                    style="width: 100%">
+                <el-table-column
+                        prop="id"
+                        label="项目编号"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="owner_id"
+                        label="业主编号"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="loc_id"
+                        label="项目地址"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="pv_area"
+                        label="项目光伏区"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="项目名称"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="disign"
+                        label="设计单位"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="type"
+                        label="项目类型"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="stage"
+                        label="项目阶段"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="date"
+                        label="项目日期"
+                >
+                </el-table-column>
+                <el-table-column
+                        prop="invest"
+                        label="投资"
+                >
+                </el-table-column>
+
+                <el-table-column
+                        fixed="right"
+                        label="操作"
+                        width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="edit(scope.row)" v-show="user.authority== 1" type="text">编辑</el-button>
+                        <el-button @click="del(scope.row.id)" v-show="user.authority== 1" type="text">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div style="background-color: white">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="pageNum"
+                        :page-sizes="[5, 10, 20, 40]"
+                        :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+
+            <el-dialog title="project表" :visible.sync="dialogFormVisible" width="30%"
+                       close-on-click-modal="false" close-on-press-escape="false" show-close="false">
+                <el-form :model="entity">
+                    <el-form-item label="项目编号(整数)" label-width="100px">
+                        <el-input v-model="entity.id" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="业主编号(整数)" label-width="100px">
+                        <el-input v-model="entity.owner_id" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目地址代号(整数)" label-width="100px">
+                        <el-input v-model="entity.loc_id" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目光伏区代号(整数)" label-width="100px">
+                        <el-input v-model="entity.pv_area" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目名称(字符串)" label-width="100px">
+                        <el-input v-model="entity.name" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="设计单位(字符串)" label-width="100px">
+                        <el-input v-model="entity.disign" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目类型(字符串)" label-width="100px">
+                        <el-input v-model="entity.type" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目阶段(字符串)" label-width="100px">
+                        <el-input v-model="entity.stage" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="项目日期(例2010-08-20)" label-width="100px">
+                        <el-input v-model="entity.date" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                    <el-form-item label="投资(小数)" label-width="100px">
+                        <el-input v-model="entity.invest" autocomplete="off" style="width: 80%"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="save">确 定</el-button>
+                </div>
+            </el-dialog>
+        </el-col>
+    </el-row>
+
+</div>
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/vue.min.js"></script>
+<script src="/js/element.js"></script>
+
+<script>
+    let urlBase = "/project/";
+    new Vue({
+        el: "#wrapper",
+        data: {
+            user: {},
+            tableData: [],
+            pageNum: 1,
+            pageSize: 10,
+            total: 0,
+            dialogFormVisible: false,
+            entity: {}
+        },
+        created() {
+            this.user = JSON.parse(localStorage.getItem("user"));
+            this.loadTable();
+        },
+        methods: {
+            logout() {
+                localStorage.removeItem("user");
+                location.href = "/login.html";
+            },
+            loadTable() {
+                $.get(urlBase + "/page?pageNum=" + this.pageNum + "&pageSize=" + this.pageSize).then(res => {
+                    console.log("-------------------------",res.data.content);
+                    this.tableData = res.data.content;
+                    this.total = res.data.totalElements;
+                })
+            },
+            exp() {
+                window.open(urlBase + "/export");
+            },
+            handleSizeChange(pageSize) {
+                this.pageSize = pageSize;
+                this.loadTable();
+            },
+            handleCurrentChange (pageNum) {
+                this.pageNum = pageNum;
+                this.loadTable();
+            },
+            add() {
+                this.entity = {};
+                this.dialogFormVisible = true;
+            },
+            save() {
+                let type = this.entity.id ? "PUT": "POST";
+                $.ajax({
+                    url: urlBase,
+                    type: type,
+                    contentType: "application/json",
+                    data: JSON.stringify(this.entity)
+                }).then(res => {
+                    if (res.code === '0') {
+                        this.$message({
+                            message: "保存成功",
+                            type: "success"
+                        });
+                        this.loadTable();
+                    } else {
+                        this.$message({
+                            message: res.msg,
+                            type: "error"
+                        })
+                    }
+                    this.dialogFormVisible = false;
+                })
+            },
+            edit(obj) {
+                this.entity = obj;
+                this.dialogFormVisible = true;
+            },
+            del(id) {
+                $.ajax({
+                    url: urlBase + id,
+                    type: "delete"
+                }).then(res => {
+                    if (res.code === '0') {
+                        this.$message({
+                            message: "删除成功",
+                            type: "success"
+                        })
+                        this.loadTable();
+                    } else {
+                        this.$message({
+                            message: res.msg,
+                            type: "error"
+                        })
+                    }
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>
